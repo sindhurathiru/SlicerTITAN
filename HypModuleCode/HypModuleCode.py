@@ -315,7 +315,10 @@ class HypModuleCodeWidget(ScriptedLoadableModuleWidget):
                 channelName = channelName[:-2]
             if channelName not in channelNames:
                 # if channelName.endswith(".ome"):
-                channelNames.append(channelName)
+                if any(substring in channelName for substring in ["Mask", "Density", "Clustering"]):
+                    pass
+                else:
+                    channelNames.append(channelName)
             if roiName not in roiNames:
                 roiNames.append(roiName)
         if roiNames == ["Scene"]:
@@ -2435,6 +2438,15 @@ class HypModuleLogic(ScriptedLoadableModuleLogic):
         existingSeriesNodes = slicer.util.getNodesByClass("vtkMRMLPlotSeriesNode")
         existingTables = slicer.util.getNodesByClass("vtkMRMLTableNode")
 
+        for table in existingTables:
+            slicer.mrmlScene.RemoveNode(table)
+
+        for plot in existingPlots:
+            slicer.mrmlScene.RemoveNode(plot)
+
+        for series in existingSeriesNodes:
+            slicer.mrmlScene.RemoveNode(series)
+
         # Get list of all channels
         allChannels = slicer.util.getNodesByClass("vtkMRMLScalarVolumeNode")
 
@@ -2505,7 +2517,7 @@ class HypModuleLogic(ScriptedLoadableModuleLogic):
             # Get column index for mean intensities array
             if re.findall(r"_[0-9]\b", channelName) != []:
                 channelName = channelName[:-2]
-            columnPos = channelNames.index(channelName) + 1
+            columnPos = channelNames.index(channelName)
             # Get arrays for cell mask and channels
             cellMaskArray = roiCellMaskArrays[roiName]
             # Get counts of pixels in each cell
@@ -2810,7 +2822,7 @@ class HypModuleLogic(ScriptedLoadableModuleLogic):
 
         # Get columns from t-sne/pca table
         if slicer.util.getNodesByClass("vtkMRMLTableNode") != []:
-            tableNode = slicer.util.getNodesByClass("vtkMRMLTableNode")[0]
+            tableNode = slicer.util.getNodesByClass("vtkMRMLTableNode")[-1]
             nRows = tableNode.GetNumberOfRows()
             kmeansArray = np.full((nRows, 2), 0.00)
             dim1 = []
