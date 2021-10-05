@@ -311,8 +311,8 @@ class HypModuleCodeWidget(ScriptedLoadableModuleWidget):
             roiName = shNode.GetItemName(parent)
             channelName = shNode.GetItemName(itemId)
             print(channelName)
-            if re.findall(r"_[0-9]\b", channelName) != []:
-                channelName = channelName[:-2]
+            if re.findall(r"_[0-9][0-9]?\b", channelName) != []:
+                channelName = channelName.split("_")[0]
             if channelName not in channelNames:
                 # if channelName.endswith(".ome"):
                 if any(substring in channelName for substring in ["Mask", "Density", "Clustering"]):
